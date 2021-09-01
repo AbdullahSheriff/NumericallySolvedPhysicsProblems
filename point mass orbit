@@ -1,0 +1,50 @@
+#Abdullah Sheriff, Student number:1002057294
+#LAB6Q1 
+from sympy import symbols, diff
+import numpy as np
+import matplotlib.pyplot as plt
+
+G=1
+M=10
+L=2
+x0=1
+y0=0.0
+Vx0=0.0
+Vy0=1.0
+t0=0.0
+tf=10.0
+N=5000
+h=(tf-t0)/N
+
+def f(r,t):
+    x = r[0]
+    Vx = r[1]
+    y = r[2]
+    Vy = r[3]
+    distance = np.sqrt(x**2+y**2)
+    return np.array([Vx,(-G*M*x)/((distance**2)*(np.sqrt(distance**2+(L**2)/4))),
+                  Vy,(-G*M*y)/((distance**2)*(np.sqrt(distance**2+(L**2)/4)))], float)
+
+tpoints=np.arange(t0,tf,h)
+xpoints=[]
+ypoints=[]
+r=np.array([x0,Vx0,y0,Vy0],float)
+#taken from textbook recources and edited slighly       (rk4.py) 
+for t in tpoints:
+    xpoints.append(r[0])
+    ypoints.append(r[2])   
+    k1=h*f(r,t)
+    k2=h*f(r+0.5*k1,t+0.5*h)
+    k3=h*f(r+0.5*k2,t+0.5*h)
+    k4=h*f(r+k3,t+h)
+    r+=(k1+2*k2+2*k3+k4)/6
+#taken from textbook recources and edited slighly      (rk4.py)
+
+plt.figure(1)
+plt.title('Orbit of ball bearing around a rod of sufficent mass [in 2D]')
+plt.plot(xpoints, ypoints,c='lime')
+plt.xlabel('x-displacment from origin')
+plt.ylabel('y-displacment form origin')
+plt.show()
+# plt.legend()
+
