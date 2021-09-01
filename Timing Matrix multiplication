@@ -1,0 +1,78 @@
+N=2
+CTF=list()
+NN=list()
+NNN=list()
+import time
+
+while N<600:
+    now= time.time()
+    A=np.ones((N,N))*5
+    B=np.ones((N,N))*3
+    np.dot(A,B)
+    later = time.time()
+    deltaT=later-now        
+    CTF.insert(N-2,deltaT)
+    NN.insert(N-2,N)
+    NNN.insert(N-2,N**3)
+    N=N+1
+
+plt.figure(5)
+plt.title('Numpy Matrix Multiplication ')
+plt.scatter(NN,CTF,s=3,c= 'r')
+#plt.plot(NN,CTF,label="fit",c='black')
+plt.xlabel('Dimensions of the square matrix')
+plt.ylabel('Time to compute in seconds')
+plt.legend()
+
+plt.figure(6)
+plt.title('Numpy Matrix Multiplication ')
+plt.scatter(NNN,CTF,s=3,c= 'r')
+#plt.plot(NNN,CTF,label="fit",c='black')
+plt.xlabel('Dimensions of the square matrix Cubed')
+plt.ylabel('Time to compute in seconds')
+plt.legend()
+        
+    
+from numpy import zeros
+
+K=2
+KK=list()
+KKK=list()
+CTS=list()  
+#CTS=np.loadtxt('C:/Users/Owner/Desktop/CTStime.txt',skiprows=0,unpack=True)
+    
+while K<304:
+      now2= time.time()
+      C1=zeros([K,K])
+      A1=np.ones((K,K))*5
+      B1=np.ones((K,K))*3
+      for i in range(K):
+          for j in range(K):
+              for k in range(K): 
+                  C1[i,j] += A1[i,k]*B1[k,j]
+                  later2 = time.time()
+                  deltaT2=later2-now2
+                  KK.insert(K-2,K)   #it took me half an hour to get bout 300 values for time so i commented this section out, and saved the time data in a text file before running the program again
+                  KKK.insert(K-2,K**3)
+                  CTS.insert(K-2,deltaT2)
+                  K=K+1
+      
+# N1=np.arange(2,304,1)
+    
+    
+      
+# plt.figure(5)
+# plt.title('"Manual" Matrix Multiplication ')
+# plt.scatter(,CTS,s=3,c= 'r')
+# #plt.plot(NN,CTF,label="fit",c='black')
+# plt.xlabel('Dimensions of the square matrix')
+# plt.ylabel('Time to compute in seconds')
+# plt.legend()
+
+# plt.figure(6)
+# plt.title('"Manual" Matrix Multiplication ')
+# plt.scatter((N1)**3,CTS,s=3,c= 'r')
+# #plt.plot(NNN,CTF,label="fit",c='black'
+# plt.xlabel('Dimensions of the square matrix Cubed')
+# plt.ylabel('Time to compute in seconds')
+# plt.legend()
