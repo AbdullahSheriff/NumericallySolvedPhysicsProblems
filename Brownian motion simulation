@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from random import randrange
+from pylab import plot, show, ylabel, xlabel, ylim, matmul, title ,legend
+
+def nextmove(x, y):
+    """ randomly choose a direction
+    0 = up, 1 = down, 2 = left, 3 = right"""
+    direction =  randrange(0,4)
+
+    if direction == 0:  # move up
+        y += 1
+    elif direction == 1:  # move down
+        y -= 1
+    elif direction == 2:  # move right
+        x += 1
+    elif direction == 3:  # move left
+        x -= 1
+    else:
+        print("error: direction isn't 0-3")
+
+    return x, y
+
+
+font = {'family': 'DejaVu Sans', 'size': 14}  # adjust fonts
+rc('font', **font)
+
+
+# %% main program starts here ------------------------------------------------|
+# YOU NEED TO FINISH IT!
+
+plt.ion()
+
+Lp = 101  # size of domain
+Nt = 5000  # number of time steps
+# arrays to record the trajectory of the particle
+# COMPLETE
+xpp1=list()
+ypp1=list()
+centre_point = (Lp-1)//2  # middle point of domain
+xp = centre_point
+yp = centre_point
+
+for i in range(Nt):
+    xpp, ypp = nextmove(xp, yp)
+    xpp1.insert(i,xpp)
+    ypp1.insert(i,ypp)
+    if 0 < xpp < Lp:
+        xp = xpp
+    if 0< ypp < Lp:
+        yp=ypp
+        
+        
+for i in range(10000000000):
+    plt.title('Animation of particle executing brownian motion')
+    plt.plot( xpp1[i*10], ypp1[i*10], '.r' ,markersize=10)
+    plt.xlim([-1, Lp])
+    plt.ylim([-1, Lp])
+    plt.xlabel('$x$ []')
+    plt.ylabel('$y$ []') 
+    plt.show()        
+    
+    
+        
+        
+     
+# plt.figure(1)
+# plt.title('Path of a particle executing brownian motion')
+# plt.plot( xpp1,  ypp1, '.r')
+# plt.xlim([-1, Lp])
+# plt.ylim([-1, Lp])
+# plt.xlabel('$x$ []')
+# plt.ylabel('$y$ []')         
+    
+    
+
