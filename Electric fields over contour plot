@@ -1,0 +1,86 @@
+#Abdullah Sheriff, Student number:1002057294
+#lab8 Q1b
+
+from numpy import zeros
+from pylab import imshow, gray, show
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+V = 1.0  # volts
+a = 0.1  # grid spacing in centimeters
+M = 100  # number of grid points
+target = 10 ** -6  # volts
+omega = 0.1
+
+def Compare(a, b):
+    if a >= b:
+        return a
+    else:
+        return b
+    
+    
+biggerDiff = 2 * target
+# initialize array
+phi = zeros([M + 1, M+ 1], float)
+phi[20:81, 20] = V
+phi[20:81, 80] = -V
+
+
+
+
+
+
+#initialize array
+phi = zeros([M + 1, M + 1], float)
+phi[20:81, 20] = V
+phi[20:81, 80] = -V
+
+# Main loop
+while biggerDiff > target:
+ 
+    biggerDiff = 0.0
+    for i in range(M + 1):
+        for j in range(M + 1):
+            if not i == 0 and not j == 0 and not i == M and not j == M and not (20 <= i <= 80 and j == 20 or j == 80):
+                old_phi = phi[i,j]
+                new_phi = (1+omega)*(phi[i+1,j]+phi[i-1,j]+phi[i,j+1]+phi[i,j-1])/4 -omega*old_phi
+                phi[i, j] = new_phi
+
+                
+                biggerDiff = Compare(biggerDiff, abs(new_phi - old_phi))
+
+
+
+
+
+x = np.linspace(100, 0, 100) # does not include zero
+y = np.linspace(100, 0, 100)
+X, Y = np.meshgrid(x, y)
+# R1 = ((X-1)**2 + Y**2)**.5 # 1st charge located at x=+1, y=0
+# R2 = ((X+1)**2 + Y**2)**.5 # 2nd charge located at x=-1, y=0
+V=0
+p=np.arange(0,60,0.0001)
+for i in p:
+    R1 = ((X-20)**2 + (Y-20-i)**2)**.5 # 1st charge located at x=+1, y=0
+    R2 = ((X-80)**2 + (Y-20-i)**2)**.5
+    V=V+ 1./R1 - 1./R2
+    
+V2=V/10**5
+# V = 1./R1 - 1./R2 # two equal-and-opposite charges
+Ey, Ex = np.gradient(-V2, y, x) # careful about order
+fig = plt.figure(figsize=(10, 5))
+strm = plt.streamplot(X, Y, Ex, Ey, color=V2, linewidth=2, cmap='winter')
+cbar = fig.colorbar(strm.lines)
+cbar.set_label('Potential $V$')
+plt.title('Electric field lines over Contour plot of the Potential (omega=0.1)')
+plt.xlabel('$x$')
+plt.ylabel('$y$')
+imshow(phi)
+gray()
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+
+    
+
