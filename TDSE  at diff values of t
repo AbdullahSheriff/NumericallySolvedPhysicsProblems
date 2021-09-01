@@ -1,0 +1,174 @@
+
+from scipy.linalg import solve_banded, solve
+import numpy as np
+from numpy import exp, linspace, array, zeros, empty
+from pylab import plot, show, ylabel, xlabel, ylim, matmul, title ,legend
+
+# Constants
+h_bar = 6.626 * 10 ** -34
+N = 1024  # number of spatial slices
+h = 10 ** -18  # time step in seconds
+m = (9.109 * 10 ** -31)  # electron mass 
+L = 10 ** -8  # m
+a = L / N  # spatial distance between points
+x0 = L / 5
+sigma = L/25  # m
+k = 500/L  # 1/m
+
+import scipy.integrate as integrate
+import scipy.special as special
+from scipy.integrate import quad
+
+
+# def psi_2(x):
+#     return 31580.938498910542*exp(-(x - x0) ** 2 / (4 * sigma ** 2)+ 1j * k * x)
+
+
+# def psi_25(x):
+#     return exp(-2*(x - x0) ** 2 / (4 * sigma ** 2))
+
+# def psi_1(x):
+#     p,q= quad(psi_25, -L/2, L/2)
+#     return np.sqrt(p)
+def psi_0(x):
+    return 31580.938498910542*exp(-(x - x0) ** 2 / (4 * sigma ** 2)+ 1j * k * x) #normalized
+
+# def psi_0(x):
+#     return exp(-(x - x0) ** 2 / (4 * sigma ** 2)+ 1j * k * x)
+# initial conditions
+x_points = linspace(-L/2, L/2, N + 1)
+psi = array(list(map(psi_0, x_points)), complex)
+psi[0] = psi[N - 1] = 0
+# omega=3e15
+# def V(x): #potential fn
+#     return ((1/2)*(omega)*(x)*m)
+V0=0
+x1=L/4
+def V(x): #potential fn
+    return V0*(((x/x1)**2)-1)**2
+# Create the L matrix where L= I + (it/2hbar)H [H is hamiltoian]
+a1 =( 1 + 1j * h * h_bar / (2 * m * a ** 2))
+a2 = (- h * h_bar * 1j / (4 * m * a ** 2))
+b1 =( 1 - 1j * h * h_bar / (2 * m * a ** 2))
+b2 = - a2
+L2 = empty([3, N + 1], complex)
+V1 = np.arange(0, N + 1)
+L2[0, 0] = 0
+L2[0, 1:] = a2
+
+
+h2=-(h_bar**2)/(2*m*a**2)
+h1=-2*h2
+
+H = zeros([N + 1, N + 1], complex)
+H[0, 0] = h1
+H[0, 1] = h2
+H[N, N - 1] = h2
+H[N, N] = h1
+for i in range(N):
+    H[i, i - 1] = h2
+    H[i, i] = h1+(V(a*(i+1)-L/2))
+    H[i, i + 1] = h2
+    
+I = zeros([N + 1, N + 1], complex)
+I[0, 0] = 1
+I[0, 1] = 0
+I[N, N - 1] = 0
+
+for i in range(N):
+    I[i, i - 1] = 0
+    I[i, i] = 1
+    I[i, i + 1] =0
+    
+I[N, N] = 0    
+    
+LM1= (I+1j*H*(h/(2*h_bar))) 
+
+for i in range(N+1):
+    L2[1,i] = I[i,i] + 1j*H[i,i]*(h/(2*h_bar))
+# L2[1, :] = a1 
+    
+L2[2, 0: N] = a2
+L2[2, N] = 0
+
+# Main loop
+# store the wavefunction at each time step in a list
+solution = [psi]
+halfstep=np.arange(0,N-1,1,complex)
+for i in range(5000):
+    for i in range(N-1):
+        halfstep[i]=I[i,i] - 1j*H[i,i]*(h/(2*h_bar))
+        
+    psi[1: N] = halfstep* psi[1: N] + b2 * (psi[2:] + psi[0: N - 1])
+    psi = solve_banded((1, 1), L2, psi)
+    solution.append(psi)
+
+
+# for n in range(5000):
+#     plot(x_points, abs(solution[25*n]) ** 2,c='red')
+#     xlabel("x (m)")
+#     ylabel("$\psi(x)$")
+#     ylim((0,10))
+#     legend()
+#     title('Psi vs displacment / animation')
+#     show()
+    
+
+
+
+h2=-(h_bar**2)/(2*m*a**2)
+h1=-2*h2
+
+#Create the Hamiltionan H
+   
+
+# Q=solve(LM1,psi)
+# solution = [psi]    
+# for i in range(3000):
+#     psi = solve(LM1,psi)
+#     solution.append(psi)    
+
+
+
+plot(x_points, abs(solution[750]**2) ,c='red',label='t=T/4')
+plot(x_points, abs(solution[0]**2) ,c='lime',label='t=0')
+plot(x_points, abs(solution[1500]**2) ,c='magenta',label='t=T/2')
+plot(x_points, abs(solution[3000]**2) ,c='blue',label='t=T')
+xlabel("x (m)")
+ylabel("$\psi(x)$")
+legend()
+title('Psi* x Psi vs displacment for diffrent values of t')
+#ylim((0,1.3))
+show()
+
+
+
+E=list()
+# 
+
+
+# for n in range(3000):
+#     E.insert(n,abs(sum(solution[n]*matmul(H,solution[n]))))
+   
+   
+   
+# def f(o):
+#     return solution[o]*matmul(H,solution[o])
+       
+   
+   
+# for n in range(6000):
+#     E.insert(n,abs(sum((h*f(n)+4*f(n+1)+2*f(n+2)+4*f(n+3)+2*f(n+4)))))
+
+# plot(h*np.arange(0,2997,1),E)  
+# xlabel("t (s)")
+# ylabel("E (J)")
+# legend()
+# title('Energy vs time')
+   
+
+
+
+
+
+
