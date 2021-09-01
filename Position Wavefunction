@@ -1,0 +1,156 @@
+from numpy import ones,copy,cos,tan,pi,linspace
+def gaussxw(N):
+
+    # Initial approximation to roots of the Legendre polynomial
+    a = linspace(3,4*N-1,N)/(4*N+2)
+    x = cos(pi*a+1/(8*N*N*tan(a)))
+
+    # Find roots using Newton's method
+    epsilon = 1e-15
+    delta = 1.0
+    while delta>epsilon:
+        p0 = ones(N,float)
+        p1 = copy(x)
+        for k in range(1,N):
+            p0,p1 = p1,((2*k+1)*x*p1-k*p0)/(k+1)
+        dp = (N+1)*(p0-x*p1)/(1-x*x)
+        dx = p1/dp
+        x -= dx
+        delta = max(abs(dx))
+
+    # Calculate the weights
+    w = 2*(N+1)*(N+1)/(N*N*(1-x*x)*dp*dp)
+
+    return x,w
+
+def gaussxwab(N,a,b):
+    x,w = gaussxw(N)
+    return 0.5*(b-a)*x+0.5*(b+a),0.5*(b-a)*w
+
+#for some reason it wasnt "callable" today i even made sure they were saved on the same folder
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Abdullah Sheriff, Student number:1002057294
+#Q2a
+import numpy as np
+from scipy import special
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit   
+
+
+def H(n,x):
+    if n==0:
+        return 1
+    if n==1:
+        return 2*x            
+    else:
+        return 2*x*H(n-1,x)-2*(n-1)*H(n-2,x)    #wrote H(n,x) baised on previous values so it can be calculated recrsivley 
+
+
+def Psi(x,n):
+    return (np.sqrt((1/((2**n)*(special.factorial(n))*np.sqrt(np.pi)))))*(H(n,x))*(np.e**((x**2)/-2))
+     
+
+
+X=np.arange(-4,4,0.01)
+
+
+plt.figure(1)
+plt.title('Position Wave Function')
+plt.plot(X,Psi(X,0),c='lime',label='n=0')
+plt.plot(X,Psi(X,1),c='aqua',label='n=1')
+plt.plot(X,Psi(X,2),c='magenta',label='n=2')
+plt.plot(X,Psi(X,3),c='purple',label='n=3')
+#plt.scatter((X),J1,c='black',s=2)
+plt.xlabel('x/displacement')                                 
+plt.ylabel('Psi(n,x)/unitless')
+plt.legend() 
+
+
+
+
+# plt.figure(2)
+# X2=np.arange(-10,10,0.01)
+# plt.title('Position Wave Function')
+# plt.plot(X2,Psi(X2,30),c='red',label='n=30')
+# #plt.scatter((X),J1,c='black',s=2)
+# plt.xlabel('x/displacement')                                 
+# plt.ylabel('Psi(n,x)/unitless')
+# plt.legend() 
+
+Evec=list()
+Xvec=list()
+Pvec=list()
+Xvec.insert(0,0.49999999999998673)
+Pvec.insert(0,0.49999999999998673)
+Evec.insert(0,0.49999999999998673)
+m=1
+while m<=15:
+    
+
+    def dPsi(x,n):
+        return (np.sqrt((1/((2**n)*(special.factorial(n))*np.sqrt(np.pi)))))*(np.e**((x**2)/-2))*(-x*H(n,x)+2*n*H(n-1,x))
+    
+    def f(z,n):
+        return ((Psi((z/(1-z**2)),n))**2)*((z/(1-z**2))**2)*((1+z**2)/(1-z**2)**2)
+    N = 100
+    a = -1.0
+    b = 1.0
+    x,w = gaussxwab(N,a,b)        #taken from page 180-181 from textbook 
+    Xrms = 0.0
+    for k in range(N):
+        Xrms += w[k]*f(x[k],m)
+        #print('<x^2>',Xrms)
+    Xvec.insert(m,Xrms)
+        
+
+    def f2(z,n):
+        return ((dPsi((z/(1-z**2)),n))**2)*((1+z**2)/(1-z**2)**2)
+    N = 100
+    a = -1.0
+    b = 1.0
+    x,w = gaussxwab(N,a,b)        #taken from page 180-181 from textbook 
+    Prms = 0.0
+    for k in range(N):
+        Prms += w[k]*f2(x[k],m)
+        #print('<P^2>',Prms)
+    Pvec.insert(m,Prms)
+        
+    E=(1/2)*(Xrms+Prms)
+    Evec.insert(m,E)
+    m=m+1
+    
+UncP=np.sqrt(Pvec) 
+UncX=np.sqrt(Xvec)
+Product=UncP*UncX 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
