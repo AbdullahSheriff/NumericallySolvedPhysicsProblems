@@ -1,0 +1,180 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+m=1
+X=np.arange(0,20.1,0.1)
+x=0
+dx=0.1
+i=0
+J1=list()
+def F(phi,x):
+    return (1/np.pi)*(np.cos(m*phi-x*np.sin(phi)))
+while i<=200:
+    N = 1000
+    a = 0.0
+    b = np.pi                      
+    h = (b-a)/N
+    M=1
+    S=F(a,x)+F(b,x)
+    Simp1=0
+    Simp2=0
+    while M<(N/2):
+        Simp1=F(a+(2*M-1)*h,x)
+        S=S+4*Simp1
+        M=M+1
+    q=1
+    while q<((N/2)-1):
+            Simp2=2*F(a+2*h*q,x)
+            S=S+Simp2
+            q=q+1
+    x=x+dx        
+    S=S*h/3
+    J1.insert(i,S)
+    i=1+i
+    
+m=0
+X=np.arange(0,20.1,0.1)
+x=0
+dx=0.1
+i=0
+J0=list()
+def F(phi,x):
+    return (1/np.pi)*(np.cos(m*phi-x*np.sin(phi)))
+while i<=200:
+    N = 1000
+    a = 0.0
+    b = np.pi                      
+    h = (b-a)/N
+    M=1
+    S=F(a,x)+F(b,x)
+    Simp1=0
+    Simp2=0
+    while M<(N/2):
+        Simp1=F(a+(2*M-1)*h,x)
+        S=S+4*Simp1
+        M=M+1
+    q=1
+    while q<((N/2)-1):
+            Simp2=2*F(a+2*h*q,x)
+            S=S+Simp2
+            q=q+1
+    x=x+dx        
+    S=S*h/3
+    J0.insert(i,S)
+    i=1+i
+
+m=2
+X=np.arange(0,20.1,0.1)
+x=0
+dx=0.1
+i=0
+J2=list()
+def F(phi,x):
+    return (1/np.pi)*(np.cos(m*phi-x*np.sin(phi)))
+while i<=200:
+    N = 1000
+    a = 0.0
+    b = np.pi                      
+    h = (b-a)/N
+    M=1
+    S=F(a,x)+F(b,x)
+    Simp1=0
+    Simp2=0
+    while M<(N/2):
+        Simp1=F(a+(2*M-1)*h,x)
+        S=S+4*Simp1
+        M=M+1
+    q=1
+    while q<((N/2)-1):
+            Simp2=2*F(a+2*h*q,x)
+            S=S+Simp2
+            q=q+1
+    x=x+dx        
+    S=S*h/3
+    J2.insert(i,S)
+    i=1+i
+
+from scipy import special   
+
+plt.figure(1)
+plt.title('Bessle functions J(m)(x) vs x')
+# plt.plot(X,special.jv(0, X),c='Black',label='Scipy m=0')
+# plt.plot(X,special.jv(1, X),c='Red',label='Scipy m=0')   #cant even tell they scipy besslefunctions are shown when uncommented...
+# plt.plot(X,special.jv(2, X),c='Blue',label='Scipy m=0')
+plt.plot(X,J0,c='lime',label='m=0')
+plt.plot(X,J1,c='aqua',label='m=1')
+plt.plot(X,J2,c='magenta',label='m=2')
+#plt.scatter((X),J1,c='black',s=2)
+plt.xlabel('x/unitless')                                 
+plt.ylabel('Jm(x)/unitless')
+plt.legend() 
+
+plt.figure(2)
+plt.title('Scipy Bessle functions J(m)(x) vs x')
+plt.plot(X,special.jv(0, X),c='Black',label='Scipy m=0')
+plt.plot(X,special.jv(1, X),c='Red',label='Scipy m=1') 
+plt.plot(X,special.jv(2, X),c='Blue',label='Scipy m=2')
+plt.xlabel('x/unitless')                                 
+plt.ylabel('Jm(x)/unitless')
+plt.legend()
+
+
+
+
+N1=1000
+
+Int=np.empty([N1,N1],np.float)
+Lnda=500*(10**-9)
+d=(10**-9)
+
+
+
+def J(m,x): #***#
+    i=0
+    def F(phi):
+        return (1/np.pi)*(np.cos(m*phi-(x)*np.sin(phi)))
+    while i<=600:
+        N = 1000
+        a = 0.0
+        b = np.pi                      
+        h = (b-a)/N
+        M=1
+        S=F(a)+F(b)
+        Simp1=0
+        Simp2=0
+        i=i+1
+        while M<(N/2):
+            Simp1=F(a+(2*M-1)*h)
+            S=S+4*Simp1
+            M=M+1
+            q=1
+        while q<((N/2)-1):
+            Simp2=2*F(a+2*h*q)
+            S=S+Simp2
+            q=q+1
+           
+        S=S*h/3
+        i=i+1
+        return S  #defining besslefunction so i can call it as J(x,y)#***#
+
+def I(L,R):
+    k=((2*np.pi)/L)
+    return ((J(1,k*R))/(k*R))**2
+
+k1=((2*np.pi))/Lnda
+for b in range(N1):
+    y = d*(b-(N1/2))
+    for h in range(N1):
+        x = d*(h-(N1/2))        #this took all morning to compute 
+        R = np.sqrt((x)**2+(y)**2)
+        if R < 0.0000000000000000001:
+            Int[h,b]=(1/(2*k1))**2   #moving through the x and y valyes by a step d each time and calclaitng the intencity at (x^2+y^2)^0.5
+        else:
+            Int[h,b]=I(Lnda,R)
+        
+plt.figure(3)
+plt.imshow(Int,vmax=0.01,cmap='hot')
+plt.title('"Heat" map of intensity of the diffraction pattern on a 1 micrometer square ')
+plt.xlabel('x/nm')                                 
+plt.ylabel('y/nm')
+plt.legend()
