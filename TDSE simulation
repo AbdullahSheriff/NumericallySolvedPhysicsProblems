@@ -1,0 +1,134 @@
+from scipy.linalg import solve_banded, solve
+import numpy as np
+from numpy import exp, linspace, array, zeros, empty, matmul, conj
+from pylab import plot, show, ylabel, xlabel, ylim
+
+# Constants
+m = 9.109 * 10 ** -31  # electron mass
+L = 10 ** -8  # m
+x0 = L / 5
+sigma = L/25  # m
+k = 500/L  # 1/m
+h_bar = 6.626 * 10 ** -34
+N = 1024  # number of spatial slices
+a = L / N  # spatial distance between points
+h = 10 ** -18  # time step in seconds
+a1 = 1 + 1j * h * h_bar / (2 * m * a ** 2)
+a2 = - h * h_bar * 1j / (4 * m * a ** 2)
+b1 = 1 - 1j * h * h_bar / (2 * m * a ** 2)
+b2 = - a2
+h2=-(h_bar**2)/(2*m*a**2)
+h1=-2*h2
+
+
+def psi_0(x):
+    return exp(-(x - x0) ** 2 / (4 * sigma ** 2)+ 1j * k * x)
+
+
+# initial conditions
+x_points = linspace(-L/2, L/2, N + 1)
+psi = array(list(map(psi_0, x_points)), complex)
+psi[0] = psi[N - 1] = 0
+def V(x): #potential fn
+    return 0
+#Create the L matrix so it can be solved using solve_baneded
+L1 = empty([3, N + 1], complex)
+L1[0, 0] = 0
+L1[0, 1:] = a2
+L1[1, :] = a1 + V(x_points)
+L1[2, 0: N] = a2
+L1[2, N] = 0
+
+# Main loop
+# store the wavefunction at each time step in a list
+solution = [psi]
+for i in range(6000):
+    psi[1: N] = b1 * psi[1: N] + b2 * (psi[2:] + psi[0: N - 1])
+    psi = solve_banded((1, 1), L1, psi)
+    solution.append(psi)
+
+
+# for n in range(3000):
+#     plot(x_points, abs(solution[n]) ** 2,c='red')
+#     xlabel("x (m)")          #simulation crashes python
+#     ylabel("$\psi(x)$")
+#     ylim((0,4))
+#     show()
+    
+    
+
+  
+
+h2=-(h_bar**2)/(2*m*a**2)
+h1=-2*h2
+
+# Create the Hamiltionan H
+H = zeros([N + 1, N + 1], complex)
+H[0, 0] = h1
+H[0, 1] = h2
+H[N, N - 1] = h2
+H[N, N] = h1
+for i in range(N):
+    H[i, i - 1] = h2
+    H[i, i] = h1+(V(a*(i+1)-L/2))
+    H[i, i + 1] = h2
+    
+I = zeros([N + 1, N + 1], complex)
+I[0, 0] = 1
+I[0, 1] = 0
+I[N, N - 1] = 0
+I[N, N] = 1
+for i in range(N):
+    I[i, i - 1] = 0
+    I[i, i] = 1
+    I[i, i + 1] =0
+    
+    
+    
+# LM1= (I+1j*H*(h/2*h_bar))    
+# Q=solve(LM1,psi)
+# solution = [psi]    
+# for i in range(3000):
+#     psi = matmul(H,psi)
+#     psi = solve(LM1 ,psi)
+#     solution.append(psi)  
+    
+    
+plot(x_points, abs(solution[750]**2) ,c='red')
+plot(x_points, abs(solution[0]**2) ,c='lime')
+plot(x_points, abs(solution[1500]**2) ,c='magenta')
+plot(x_points, abs(solution[3000]**2) ,c='blue')
+xlabel("x (m)")
+ylabel("$\psi(x)$")
+#ylim((0,1.3))
+show()
+    
+    
+    
+for n in range(6000):
+    plot(x_points, abs(solution[10*n]) ** 2,c='red')
+    xlabel("x (m)")
+    ylabel("$\psi(x)$")
+    ylim((0,4))
+    show()
+    
+    
+E=list()
+
+
+
+# for n in range(3000):
+#    E.insert(n,abs(sum(solution[n]*matmul(H,solution[n]))))
+   
+   
+   
+# def f(o):
+#     return solution[o]*matmul(H,solution[o])
+       
+   
+   
+# for n in range(6000):
+#     E.insert(n,(sum((f(n)+4*f(n+1)+2*f(n+2)+4*f(n+3)+2*f(n+4)))))
+
+plot(E)   
+   
