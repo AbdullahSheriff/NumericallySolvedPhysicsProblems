@@ -1,0 +1,84 @@
+import numpy as np
+import matplotlib.pyplot as plt
+#from scipy.optimize import curve_fit
+time=np.arange(0,1.0001,0.0001)
+sizet=np.size(time)
+dt=0.0001
+i=0
+Vx=0
+Vy=8.1
+x=0.47
+y=0 #Setting parameters and variables
+G=39.5
+M=1.0
+C=G*M
+X=list()
+Y=list()
+Velx=list()
+Vely=list()
+while i<=10000:
+    X.insert(i,x)
+    Y.insert(i,y)
+    Velx.insert(i,Vx) #looping over 1 year with 0.0001 year increments calcualting the x and y components of velocity and displacment.
+    Vely.insert(i,Vy)
+    x=x+(Vx*dt)
+    y=y+Vy*dt
+    Vx=Vx-((C*x*dt)/(x**2+y**2)**(3/2))
+    Vy=Vy-((C*y*dt)/(x**2+y**2)**(3/2))
+    i=i+1
+IP=0.47*8.1+0*0 #initial momentum 
+FP= Velx[10000]*Y[10000]+Vely[10000]*X[10000] #final momentum
+print(IP-FP) #if non zero ang-mometum is not conserved (it wasnt)
+plt.figure(1)
+plt.title('2D-Plane motion ')
+#plt.scatter(X,Y, label='raw data',c= 'r')
+plt.plot(Y,X,c='black')
+plt.xlabel('X Displacement in AU')
+plt.ylabel('Y Displacement in AU')
+plt.legend()
+
+plt.figure(2)
+plt.title('Velocity-time ')
+plt.plot(time,Vely,label='Y-component',c='red')
+#plt.scatter(X,Y, label='raw data',c= 'r')    #the various required graphs 
+plt.plot(time,Velx,label='X-component',c='Blue')
+plt.xlabel('time/Years')
+plt.ylabel('Velocity/ AU/year')
+plt.legend()
+
+plt.figure(3)
+plt.title('Displacement-time ')
+plt.plot(time,Y,label='Y-component',c='red')
+#plt.scatter(X,Y, label='raw data',c= 'r')
+plt.plot(time,X,label='X-component',c='Blue')
+plt.xlabel('time/Years')
+plt.ylabel('Displacement/AU')
+plt.legend()
+
+j=0
+Vx=0
+Vy=8.17
+x=0.47 #resetting variables and parameters just in case 
+a=0.01
+y=0
+G=39.5
+M=1.0
+C=G*M
+while j<=10000:
+    X.insert(j,x)
+    Y.insert(j,y)
+    Velx.insert(j,Vx)
+    Vely.insert(j,Vy)  #looping over  1 earth year once again to calculate the trajectory and velocity of Mercury corrected for General Reletivity 
+    x=x+(Vx*dt)
+    y=y+Vy*dt
+    Vx=Vx-(((C*x*dt)/(x**2+y**2)**(3/2)))*(1+a/(x**2+y**2))
+    Vy=Vy-(((C*y*dt)/(x**2+y**2)**(3/2)))*(1+a/(x**2+y**2))
+    j=j+1
+    
+plt.figure(4)
+plt.title('2D-Plane motion ')
+plt.scatter(X,Y,s=0.05,c= 'r')
+#plt.plot(Y,X,c='black')                   #The required graph of how the orbit of Hg changes 
+plt.xlabel('X Displacement in AU')
+plt.ylabel('Y Displacement in AU')
+plt.legend()
