@@ -1,0 +1,84 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import rc
+from random import randrange
+from pylab import plot, show, ylabel, xlabel, ylim, matmul, title ,legend
+
+
+
+def nextmove(x,y):
+    
+
+    """ randomly choose a direction
+    0 = up, 1 = down, 2 = left, 3 = right"""
+    direction=randrange(1,5)
+
+    if direction==1:
+        #move up
+        y+=1
+    elif direction==2:
+        #move down
+        y-=1
+    elif direction==3:
+        #move right
+        x+=1 
+    elif direction==4:
+        #move left
+        x-=1
+    else:
+        print ("error: direction isn't 1-4")
+        
+    return x,y
+
+
+
+# %% main program starts here -------------
+# YOU NEED TO FINISH IT!
+
+
+#plt.ion()
+# font = {'family': 'DejaVu Sans', 'size': 14}  # adjust fonts
+# rc('font', **font)
+Lp=201 # size of domain
+N=1000 #200000 # number of particles
+anchored=(np.empty([Lp, Lp], int))*0# array to represent whether each gridpoint has an anchored particle
+anchored_points=[[],[]] # list to represent x and y positions of anchored points
+centre_point=100 # middle point of domain
+
+# set up animation of anchored points
+animation_interval=50 # how many moves to make before updating plot of Brownian motion
+
+
+for j in range(N):
+    xp = (centre_point)
+    yp = (centre_point)
+    # i=0 # counter to keep track of animation of moving particle
+    
+    Free2Move=True
+    while Free2Move:
+       
+        if yp == 0 or yp == Lp-1 or xp == 0 or xp == Lp-1: 
+            anchored[xp,yp]=1
+            anchored_points[0].append(xp)
+            anchored_points[1].append(yp)
+            
+            Free2Move=False
+        elif anchored[xp-1:xp+2,yp-1:yp+2].any(): 
+            anchored[xp,yp]=1
+            anchored_points[0].append(xp)
+            anchored_points[1].append(yp)
+            
+            Free2Move=False
+        else: 
+           
+            xp,yp=nextmove(xp,yp)
+            
+
+for i in range(N):
+    plt.title('Animation of DLA growth')
+    plt.plot( anchored_points[0][:i*10], anchored_points[1][:i*10], '.r' ,markersize=10)
+    plt.xlim([-1, Lp])
+    plt.ylim([-1, Lp])
+    plt.xlabel('$x$ []')
+    plt.ylabel('$y$ []') 
+    plt.show()        
