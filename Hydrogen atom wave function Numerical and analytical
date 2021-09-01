@@ -1,0 +1,171 @@
+import matplotlib.pyplot as plt
+from numpy import array,arange
+import scipy.constants as pc
+import numpy as np
+a = pc.physical_constants['Bohr radius'][0]
+E0 = pc.physical_constants['Rydberg constant'][0]
+eeconst=8.85*10**-12
+pc.m_e # electron mass
+pc.hbar
+pc.e # elementary charge
+
+# Constants
+m = pc.m_e     # Mass of electron
+hbar = pc.hbar # Planck's constant over 2*pi
+e = pc.e    # Electron charge
+L =a    # Bohr radius
+#N = 500
+h = 0.002*a
+
+
+l=0
+
+
+
+
+# Potential function (edited)
+def V(x):
+    return -(e**2)/(4*np.pi*x*eeconst)
+
+def f(r,x,E,l):
+    if 25*a >= x > 0:
+        
+        psi = r[0]
+        R = r[1]
+        fpsi = R/(x**2)
+        fR = ((2*m*(x**2)/hbar**2)*(V(x)-E)+((l+1)*l))*psi
+        return array([fpsi,fR],float)
+    else:
+        return array([0,1],float)
+    
+    
+        
+
+# Calculate the wavefunction for a particular energy
+def solve(E):
+    psi = 0.0
+    R = 1.0
+    r = array([psi,R],float)
+    wavefunction = []
+    for x in arange(h,30*L+h,h):
+        wavefunction.append(r[0])
+        k1 = h*f(r,h+x,E,l)
+        k2 = h*f(r+0.5*k1,h+x+0.5*h,E,l)
+        k3 = h*f(r+0.5*k2,h+x+0.5*h,E,l)
+        k4 = h*f(r+k3,x+2*h,E,l)
+        r += (k1+2*k2+2*k3+k4)/6
+
+    return r[0]
+
+# Main program to find the energy using the secant method
+n=1
+E2 = -13*e/n**2.
+
+E1 = -15*e/n**2 
+psi2 = solve(E1)
+
+target = e/1000
+while abs(E1-E2)>target:
+    psi1,psi2 = psi2,solve(E2)
+    E1,E2 = E2,E2-psi2*(E2-E1)/(psi2-psi1)
+
+print("E =",E2/e,"eV")
+
+#squarewell.py (edited)
+
+
+def solve2(E):
+    psi = 0.0
+    R = 1.0
+    r = array([psi,R],float)
+    wavefunction = []
+    for x in arange(h,30*L+h,h):
+        wavefunction.append(r[0])
+        k1 = h*f(r,h+x,E,l)
+        k2 = h*f(r+0.5*k1,h+x+0.5*h,E,l)
+        k3 = h*f(r+0.5*k2,h+x+0.5*h,E,l)
+        k4 = h*f(r+k3,x+2*h,E,l)
+        r += (k1+2*k2+2*k3+k4)/6
+
+    return array(wavefunction, float)
+
+# # plt.plot(arange(h,30*L+h,h),solve2(-13.6*e/4))
+# # plt.plot(arange(h,30*L+h,h),solve2(-13.6*e))
+
+N=(np.size(np.arange(h,30*L+h,h)))
+
+
+
+def PlottingRoot(E1, E2):
+    target_accuracy = e/1000
+    WF = solve2(E1)
+    psi2 = WF[N - 1]
+    while abs(E1-E2) > target_accuracy:
+        WF = solve2(E2)
+        psi1, psi2 = psi2, WF[N-1]
+        E1, E2 = E2,E2-psi2*(E2-E1)/(psi2-psi1)
+
+    #Simpsons rule
+    Msq = WF*WF
+    integral = h/3*(Msq[0] + Msq[N//2-1]+ 4*np.sum(Msq[1:N//2:2]) + 2*np.sum(Msq[0:N//2+1:2]))
+
+    return WF/np.sqrt(2*integral)
+
+
+#psi0 = PlottingRoot(-13*e, -15*e) # n=1
+psi1 = PlottingRoot(-13*e/4, -15*e/4) #n=2 ,l=1 and l=0 by chaning l above 
+
+
+xpoints=np.arange(h,30*L+h,h)
+plt.figure(1)
+#plt.plot(np.arange(h,30*L+h,h), psi0[::-1],'red')
+plt.plot(np.arange(h,30*L+h,h), psi1, 'red')
+plt.xlabel('x (m)')
+plt.ylabel('psi')
+plt.title('n=2 l=0')
+
+
+
+#analytical 
+R10const=(2/a**(3/2))
+def R10(x):
+    return R10const*(np.e**(-x/a))/293333333  
+
+# def R21(x):
+#     return (2/((2*(np.sqrt(6))*(a**(3/2)))*a**(3/2)))*(2-(x/a))*e**-(x/2*a)
+
+# plt.figure(2)
+# plt.plot(np.arange(h,30*L+h,h), R10(np.arange(h,30*L+h,h)),label='analytical',c='magenta')
+# plt.plot(np.arange(h,30*L+h,h), psi0[::-1],label='Numerical',c='lime')
+# # plt.plot(np.arange(h,30*L+h,h), R20(np.arange(h,30*L+h,h)), 'lime')
+# # plt.plot(np.arange(h,30*L+h,h), R21(np.arange(h,30*L+h,h)), 'blue')
+# plt.xlabel('x (m)')
+# plt.ylabel('psi')
+# plt.title('n=1 l=0')
+# plt.legend()
+
+
+# R20const=(1/(2*np.sqrt(2)))*(1/a**(3/2))
+# def R20(x):
+#     return 62500*(2-((10**10)*x))*(np.e**(-x*(10**10)))
+# plt.figure(3)
+# plt.plot(np.arange(h,30*L+h,h), R20(np.arange(h,30*L+h,h)),label='analytical',c='magenta')
+# plt.plot(np.arange(h,30*L+h,h), psi1,label='Numerical',c='lime')
+# plt.xlabel('x (m)')
+# plt.ylabel('psi')
+# plt.title('n=2 l=0')
+# plt.legend()
+
+
+def R21(x):
+    return (50000/3.5)*(10**11)*x*np.e**((-x*10**10))
+plt.figure(4)
+plt.plot(np.arange(h,30*L+h,h), R21(np.arange(h,30*L+h,h)),label='analytical',c='magenta')
+plt.plot(np.arange(h,30*L+h,h), psi1,label='Numerical',c='lime')
+plt.xlabel('x (m)')
+plt.ylabel('psi')
+plt.title('n=2 l=1')
+plt.legend()
+
+
+
